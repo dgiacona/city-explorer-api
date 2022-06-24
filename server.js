@@ -1,13 +1,55 @@
 'use strict'
 
-require('dotenv').config();
-
+const dotenv = require('dotenv').config();
 const express = require('express');
-const app = express();
-
-const getWeather = require('./weather.js');
-const getMovies = require('./movie.js');
-
+const axios = require('axios');
 const cors = require('cors');
+const getWeather = require('./weather.js');
+const getMOvies = require('./movie.js');
 
+
+
+const app = express();
 app.use(cors());
+
+const PORT= process.env.PORT || 3002;
+
+async function handleWeather (req, res) {
+  let searchQueryCity = req.searchQueryCity;
+  const {lat, lon} = req.query
+  try {
+    let reponse = await getWeather({lat,lon});
+    res.send(response);
+  }catch (error){
+    console.log(error);
+  }
+}
+
+async function getMovies (req, res) {
+  let searchQueryCity = req.query.movieQueryCity;
+  try {
+    let reponse = await getMovies(movieQueryCity);
+    res.send(response);
+  }catch (error){
+    console.log(error);
+  }
+}
+
+app.get('/', (reg, res) => {
+  res.status(200).send('Hello there!');
+});
+
+app.get('*', (reg, res) => {
+  res.status(404).send('This is not what you are looking for');
+})
+
+app.get('/weather', handleWeather);
+
+app.get('/movies', getMovies)
+
+
+app.use((error, req, res, next) => {
+  console.log(error.message);
+})
+
+app.listen(PORT, () => console.log(`listening on port ${PORT}`))
